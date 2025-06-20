@@ -3,17 +3,39 @@
 #include "tokenization.hpp"
 #include <cstddef>
 #include <optional>
+#include <variant>
 #include <vector>
+#include <variant>
 using namespace std;
 
-struct NodeExpr {
+struct NodeExprIntLit {
     Token int_lit;
 };
 
-struct NodeExit {
+struct NodeExprIdent {
+    Token ident;
+};
+
+struct NodeExpr {
+    std::variant<NodeExprIntLit, NodeExprIdent> var;
+};
+
+struct NodeStmtExit {
     NodeExpr expr;
 };
 
+struct NodeStmtLet {
+    Token ident;
+    NodeExpr expr;
+};
+
+struct NodeStmt {
+    std::variant<NodeStmtExit, NodeStmtLet> var;
+};
+
+struct NodeProg {
+    vector<NodeStmt> stmts;
+};
 
 
 class Parser {
@@ -24,15 +46,16 @@ public:
     }
 
     optional<NodeExpr> parse_expr();
+    optional<NodeStmt> parse_stmt();
     optional<NodeExit> parse();
 
 private:
-    [[nodiscard]] inline optional<Token> peek(int ahead = 1) const {
-        if(m_index+ahead > m_tokens.size()) {
+    [[nodiscard]] inline optional<Token> peek(int offset = 0) const {
+        if(m_index+offset >= m_tokens.size()) {
             return {};
         }
         else {
-            return m_tokens.at(m_index);
+            return m_tokens.at(m_index + offset);
         }
     }
 
