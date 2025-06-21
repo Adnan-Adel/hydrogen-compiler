@@ -47,7 +47,7 @@ public:
 
     optional<NodeExpr> parse_expr();
     optional<NodeStmt> parse_stmt();
-    optional<NodeExit> parse();
+    optional<NodeProg> parse_prog();
 
 private:
     [[nodiscard]] inline optional<Token> peek(int offset = 0) const {

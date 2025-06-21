@@ -68,36 +68,16 @@ optional<NodeStmt> Parser::parse_stmt() {
     }
 }
 
-
-optional<NodeExit> Parser::parse() {
-    optional<NodeExit> exit_node;
+optional<NodeProg> Parser::parse_prog() {
+    NodeProg prog;
     while (peek().has_value()) {
-        if (peek().value().type == TokenType::exit && peek(1).has_value()
-            && peek(1).value().type == TokenType::open_paren) {
-            consume(); // consume the exit
-            consume(); // consume open paren
-
-            // parse expression
-            if (auto node_expr = parse_expr()) {
-                exit_node = NodeExit{.expr = node_expr.value()};
-            } else {
-                cerr << "Invalid Expression!" << endl;
-                exit(EXIT_FAILURE);
-            }
-            if (peek().has_value() && peek().value().type == TokenType::close_paren) {
-                consume();
-            } else {
-                cerr << "Expected `)`!" << endl;
-                exit(EXIT_FAILURE);
-            }
-            if (peek().has_value() && peek().value().type == TokenType::semi) {
-                consume();
-            } else {
-                cerr << "Expected `;`!" << endl;
-                exit(EXIT_FAILURE);
-            }
+        // parse statements
+        if (auto stmt = parse_stmt()) {
+            prog.stmts.push_back(stmt.value());
+        } else {
+            cerr << "Invalid Statement!" << endl;
+            exit(EXIT_FAILURE);
         }
     }
-    m_index = 0;
-    return exit_node;
+    return prog;
 }
